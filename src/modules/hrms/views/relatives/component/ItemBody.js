@@ -1,0 +1,54 @@
+import React, {useEffect, useRef, useState} from "react";
+import classNames from "classnames";
+import {get, isEqual} from "lodash";
+import {withRouter} from "react-router-dom";
+import {withTranslation} from "react-i18next";
+
+const ItemBody = (props) => {
+  const [isActive, setIsActive] = useState(false);
+  const {body, history} = props;
+  const ref = useRef(false);
+  useEffect(() => {
+    const pageClickEventDropdown = (e) => {
+      if (
+        ref.current !== null &&
+        !ref.current.contains(e.target)
+      ) {
+        setIsActive(!isActive);
+      }
+    };
+
+    if (isActive) {
+      window.addEventListener("click", pageClickEventDropdown);
+    }
+    return () => {
+      window.removeEventListener("click", pageClickEventDropdown);
+    };
+  }, [isActive]);
+  return (
+    <tbody ref={ref}>
+    {body && body.map((td, index) => (
+      <tr
+        key={td.id}
+        style={{verticalAlign: "middle"}}
+          className={classNames("mode-dark pointer", {
+            bg_active: isEqual(isActive, index)
+          })}
+          onClick={() => setIsActive(index)}
+          onDoubleClick={() => history.push(`/relatives/view/${td.id}`)}
+        >
+        <td>{get(td, "id", "")}</td>
+        <td>{get(td, "relationship", "")}</td>
+        <td>{get(td, "firstname", "")}</td>
+          <td>{get(td, "lastname", "")}</td>
+          <td>{get(td, "patronymic", "")}</td>
+          <td>{get(td, "address", "")}</td>
+          <td>{get(td, "workplace", "")}</td>
+          <td>{get(td, "user.phone", "")}</td>
+        </tr>
+      ))}
+    </tbody>
+  );
+};
+
+export default withTranslation("HRMS")(withRouter(ItemBody));
